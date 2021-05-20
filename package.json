@@ -1,0 +1,48 @@
+{
+  "name": "maginhawa",
+  "version": "0.1.0",
+  "description": "App for community drives",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx webpack --mode production",
+    "serve": "npx webpack serve --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/preset-env": "^7.14.1",
+    "@babel/preset-react": "^7.13.13",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^5.2.4",
+    "mini-css-extract-plugin": "^1.6.0",
+    "node-sass": "^5.0.0",
+    "react-hot-loader": "^4.13.0",
+    "sass-loader": "^11.0.1",
+    "webpack": "^5.36.2",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {
+    "@auth0/auth0-react": "^1.5.0",
+    "@progress/kendo-licensing": "^1.1.4",
+    "@progress/kendo-react-dropdowns": "^4.6.0",
+    "@progress/kendo-react-inputs": "^4.6.0",
+    "@progress/kendo-react-layout": "^4.5.0",
+    "@progress/kendo-react-listview": "^4.6.0",
+    "@progress/kendo-theme-default": "^4.38.1",
+    "auth0": "^2.35.0",
+    "busboy": "^0.3.1",
+    "express": "^4.17.1",
+    "html-webpack-plugin": "^5.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^2.0.3",
+    "pouchdb": "^7.2.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "redis": "^3.1.2",
+    "ws": "^6.2.1"
+  }
+}
