@@ -45,8 +45,35 @@ function createChatClient(settings) {
 
         if (type === 'request') {
             handleResponse(message.nonce, message.response)
+        } else if (type === 'broadcast') {
+            let data = null
+
+            let action = message.data.action
+            if (action === 'sent-message') {
+                data = {
+                    messageId: message.data.messageId,
+                    nonce: message.data.nonce,
+                    text: message.data.text,
+                    attachments: message.data.attachments,
+                    sender: message.data.sender,
+                    timestamp: message.data.timestamp
+                }
+            }
+
+            const privateChatIterator = privateChats.keys()
+            while (true) {
+                const { done, value } = privateChatIterator.next()
+
+                if (done) {
+                    break
+                }
+
+                let subscribers = value.subscribers
+                for (let x = 0; x < value.subscribers.length; x++) {
+                    subscribers[x](data)
+                }
+            }
         }
-        // TODO: might we need a broadcast type here?
     }
 
     function load() {
@@ -95,7 +122,8 @@ function createChatClient(settings) {
             chatId,
             sender,
             text,
-            attachments
+            attachments,
+            timestamp: Date.now()
         })
     }
 
@@ -106,13 +134,38 @@ function createChatClient(settings) {
             recipientId
         }).then(function (data) {
             let chat = data.chat
-            privateChats.set(chat._id, chat)
+            let subscribers = []
 
-            return {}
+            privateChats.set(chat._id, {
+                chat,
+                subscribers
+            })
+
+            return {
+                sendMessage: function (text, attachments, timestamp) {
+                    return sendChatMessage(chat._id, userId, text, attachments, timestamp)
+                },
+                subscribeToMessages: function (subscriber) {
+                    subscribers.push(subscriber)
+                },
+                unsubscribeFromMessages: function (subscriber) {
+                    subscribers.splice(subscribers.indexOf(subscriber), 1)
+                },
+                getParticipants: function () {
+                    return chat.participants
+                },
+                getUser: function () {
+                    return userId
+                }
+            }
         }).catch(function (err) {
             console.error(err)
             return err
         })
+    }
+
+    function authenticate() {
+
     }
 
     client.load = load

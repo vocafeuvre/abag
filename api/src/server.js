@@ -64,7 +64,26 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
     function handleApiCall(call, respond) {
         var action = call.action
 
-        if (action === 'sync-profile') {
+        if (action === 'get-user') {
+            apiDb.get(call.userId).then(function (doc) {
+                if (doc) {
+                    respond({
+                        data: {
+                            user: doc
+                        }
+                    })
+                } else {
+                    respond({
+                        error: 'User not found.'
+                    })
+                }
+            }).catch(function (err) {
+                console.error(err)
+                respond({
+                    error: 'Unable to get user.'
+                })
+            })
+        } else if (action === 'sync-profile') {
             if (activeProfiles.has(call.userId)) {
                 respond({
                     data: {

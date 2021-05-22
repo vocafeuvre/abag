@@ -11,13 +11,14 @@ const BUFFER_MESSAGE_TYPES = {
 
 const IGNORED_SOCKET_LIFETIME = 100 // in ms
 
-function createChatMessage(chatId, nonce, text, sender, attachments) {
+function createChatMessage(chatId, nonce, text, sender, attachments, timestamp) {
     return {
         chatId,
         nonce,
         text,
         sender,
-        attachments
+        attachments,
+        timestamp
     }
 }
 
@@ -35,7 +36,30 @@ function createChatServer(wsServer = new WebSocket.Server(), chatPersister) {
 
     const pendingAttachments = new Map() // message-id => attachments[]
 
-    function handleRequest(request, respond, respondWithBuffer) {
+    function subscribeToChat(chatId, socketId) {
+        let subscribersByChat = chatSubscribers.get(chatId)
+
+        if (!subscribersByChat) {
+            subscribersByChat = new Set()
+        }
+
+        subscribersByChat.add(socketId)
+        chatSubscribers.set(subscribersByChat)
+    }
+
+    function unsubscribeFromChat(chatId, socketId) {
+        let subscribersByChat = chatSubscribers.get(chatId)
+
+        if (!!subscribersByChat) {
+            subscribersByChat.add(socketId)
+
+            if (subscribersByChat.size <= 0) {
+                chatSubscribers.delete(chatId)
+            }
+        }
+    }
+
+    function handleRequest(request, respond, respondWithBuffer, socketId) {
         var action = request.action
 
         if (action === 'send-message') {
@@ -49,7 +73,7 @@ function createChatServer(wsServer = new WebSocket.Server(), chatPersister) {
             }
 
             let attachments = request.attachments
-            let chatMessage = createChatMessage(chatId, chatInfo.nonce++, request.text, request.sender, attachments)
+            let chatMessage = createChatMessage(chatId, chatInfo.nonce++, request.text, request.sender, attachments, request.timestamp)
             let messageId = createUuid()
 
             let attachmentsByMessage = new Map()
@@ -78,9 +102,12 @@ function createChatServer(wsServer = new WebSocket.Server(), chatPersister) {
                             let socket = sockets.get(value)
         
                             socket.send(JSON.stringify({
-                                type: 'message-sent',
-                                messageId,
-                                ...chatMessage
+                                type: 'broadcast',
+                                data: {
+                                    action: 'sent-message',
+                                    messageId,
+                                    ...chatMessage
+                                }
                             }))
                         }
                     }
@@ -114,29 +141,15 @@ function createChatServer(wsServer = new WebSocket.Server(), chatPersister) {
                 })
             })
         } else if (action === 'subscribe-chat') {
-            let subscribersByChat = chatSubscribers.get(request.chatId)
+            subscribeToChat(request.chatId, socketId)
 
-            if (!subscribersByChat) {
-                subscribersByChat = new Set()
-            }
-
-            subscribersByChat.add(socketId)
-            chatSubscribers.set(subscribersByChat)
             respond({
                 data: {
                     chatId
                 }
             })
         } else if (action === 'unsubscribe-chat') {
-            let subscribersByChat = chatSubscribers.get(request.chatId)
-
-            if (!!subscribersByChat) {
-                subscribersByChat.add(socketId)
-
-                if (subscribersByChat.size <= 0) {
-                    chatSubscribers.delete(request.chatId)
-                }
-            }
+            unsubscribeFromChat(request.chatId, socketId)
 
             respond({
                 data: {
@@ -161,6 +174,7 @@ function createChatServer(wsServer = new WebSocket.Server(), chatPersister) {
                     .then(function (chatInfo) {
                         if (chatInfo) {
                             activeChats.set(chatInfo._id, chatInfo)
+
                             respond({
                                 data: {
                                     userId,
@@ -272,7 +286,7 @@ function createChatServer(wsServer = new WebSocket.Server(), chatPersister) {
                 socket.send(JSON.stringify(response))
             }, function (response) {
                 socket.send(response)
-            })
+            }, socketId)
         ]
     }
 

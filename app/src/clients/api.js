@@ -7,6 +7,8 @@ function createApiClient(settings) {
     var apiCallNoncer = 0
     var pendingApiCalls = new Map()
 
+    var userIsAuthed = false
+
     var client = {}
 
     function handleApiCallResponse(nonce, response) {
@@ -90,11 +92,33 @@ function createApiClient(settings) {
         })
     }
 
-    function authenticate() {
+    function authenticate(authToken) {
+        return makeApiCall({
+            authToken
+        }).then(function (data) {
+            userIsAuthed = true
+        }).catch(function (err) {
+            console.error(err)
+        })
+    }
+
+    function logout() {
 
     }
 
+    function getUser(userId) {
+        return makeApiCall({
+            userId
+        }).then(function (data) {
+            return data
+        }).catch(function (err) {
+            console.error(err)
+            return err
+        })
+    }
+
     client.load = load
+    client.getUser = getUser
 
     return client
 }
