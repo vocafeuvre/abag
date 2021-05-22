@@ -1,6 +1,5 @@
 const WebSocket = require('ws')
-const createUuid = require('../../common/fast-uuid')
-const { encodeWsBuff, decodeWsBuff } = require('../../common/wsbuff')
+const { decodeWsBuff } = require('../../common/wsbuff')
 
 const { verifyToken, getProfile: getProfileFromToken } = require('./auth')
 
@@ -62,64 +61,78 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
         }
     }
 
-    function handleJsonMessage(data, socketId, socket) {
-        data = JSON.parse(data)
-        var type = data.type
+    function handleApiCall(call, respond) {
+        var action = call.action
 
-        if (type === 'get-drives') {
-
-        } else if (type === 'send-donation') {
-
-        } else if (type === 'send-volunteer-request') {
-
-        } else if (type === 'sync-profile') {
-            if (activeProfiles.has(data.userId)) {
-                socket.send(jsonify({
-                    nonce: data.nonce,
-                    type: 'profile-synced',
-                    userId: data.userId,
-                    profile: activeProfiles.get(data.userId)
-                }))
+        if (action === 'sync-profile') {
+            if (activeProfiles.has(call.userId)) {
+                respond({
+                    data: {
+                        action,
+                        userId: call.userId,
+                        profile: activeProfiles.get(call.userId)
+                    }
+                })
             } else {
-                socket.send(jsonify({
-                    nonce: data.nonce,
-                    type: 'unauthenticated',
-                    userId: data.userId
-                }))
+                respond({
+                    data: {
+                        action: 'unauthenticated',
+                        userId: call.userId
+                    }
+                })
             }
-        } else if (type === 'authenticate') {
-            verifyToken(data.authToken).then(function (result) {
+        } else if (action === 'authenticate') {
+            verifyToken(call.authToken).then(function (result) {
                 if (result) {
-                    getProfileFromToken(data.authToken).then(function (rawProfile) {
+                    getProfileFromToken(call.authToken).then(function (rawProfile) {
                         apiDb.findOrCreateProfile(rawProfile).then(function (profile) {
                             var userId = profile.userId
 
                             activeProfiles.set(profile)
 
-                            socket.send(jsonify({
-                                nonce: data.nonce,
-                                type: 'authenticated',
-                                userId
-                            }))
+                            respond({
+                                data: {
+                                    action,
+                                    userId,
+                                    isAuthed: true,
+                                    profile
+                                }
+                            })
                         }).catch(function (err) {
                             console.error('Profile creation error, ', err)
-                            socket.send(jsonify({
-                                nonce: data.nonce,
-                                type: 'profile-creation-error'
-                            }))
+                            respond({
+                                error: 'Profile creation error'
+                            })
                         })
                     })
                 } else {
-                    socket.send(jsonify({
-                        nonce: data.nonce,
-                        type: 'unauthenticated'
-                    }))
+                    respond({
+                        data: {
+                            action,
+                            userId,
+                            isAuthed: false
+                        }
+                    })
                 }
             }).catch(function (err) {
                 console.error('Authentication error, ', err)
+                respond({
+                    error: 'Authentication error'
+                })
+            })
+        }
+    }
+    
+    function handleJsonMessage(message, socketId, socket) {
+        message = JSON.parse(message)
+        var type = message.type
+
+        if (type === 'api-call') {
+            handleApiCall(message.call, function (response) {
                 socket.send(jsonify({
-                    nonce: data.nonce,
-                    type: 'auth-error'
+                    type,
+                    nonce: message.nonce,
+                    response
                 }))
             })
         }

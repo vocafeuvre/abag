@@ -1,0 +1,97 @@
+@use '../../styles/variables';
+
+.drive-view {
+    display: flex;
+    flex-direction: column;
+
+    padding: 0 variables.get-rem(35);
+
+    &-entry {
+        display: flex;
+
+        padding: variables.get-rem(8) variables.get-rem(14);
+        margin-bottom: variables.get-rem(10);
+
+        &__pic {
+            order: 1;
+
+            width: variables.get-rem(84);
+            height: variables.get-rem(64)
+        }
+
+        &__info {
+            order: 2;
+
+            width: variables.get-rem(400);
+            padding: 0 variables.get-rem(10);
+        }
+
+        &__title {
+            color: variables.get-color('text-heading');
+            font-size: variables.get-font-size('headtext');
+            line-height: variables.get-line-height('headtext');
+            font-size: 600;
+            margin-bottom: variables.get-rem(2);
+        }
+
+        &__subtext {
+            font-size: variables.get-font-size('minitext');
+            line-height: variables.get-line-height('minitext');
+            font-weight: 300;
+        }
+
+        &__organizer {
+            order: 3;
+
+            margin-left: auto;
+        }
+
+        &__organizer-avatar {
+            border-radius: 50%;
+            margin-right: variables.get-rem(14);            
+        }
+
+        &__organizer-name {
+            font-size: variables.get-font-size('captiontext');
+            line-height: variables.get-line-height('captiontext');
+            font-weight: 400;
+        }
+
+        &-stats {
+            order: 4;
+
+            margin-left: variables.get-rem(20);
+        }
+
+        &__stat:not(:last-child) {
+            margin-right: variables.get-rem(16);
+        }
+
+        &__stat-icon  {
+            font: variables.get-font-size('icon') "WebComponentsIcons";
+            margin-right: variables.get-rem(12);
+        }
+
+        &__stat-icon__volunteer {
+            &::before {
+                content: '\e81b';
+                color: variables.get-color('brand-tertiary');
+            }
+        }
+
+        &__stat-icon__donation {
+            &::before {
+                content: '\e301';
+                color: variables.get-color('brand-secondary');
+            }
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+@media screen and (max-width: 700px) {
+
+}

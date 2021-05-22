@@ -62,6 +62,15 @@ function wrapChatDb(chatDb = new PouchDB(), chatMessageDb = new PouchDB()) {
         })
     }
 
+    function updateChat(chat) {
+        return chatDb.put(chat).then(function (response) {
+            return response
+        }).catch(function (err) {
+            console.error(err)
+            return false
+        })
+    }
+
     function getChatMessages(id, limit) {
         return chatMessageDb.find({
             selector: {
@@ -110,6 +119,7 @@ function wrapChatDb(chatDb = new PouchDB(), chatMessageDb = new PouchDB()) {
         createPrivateChat,
         createRoomChat,
         getChat,
+        updateChat,
         getPrivateChatByUser,
         getChatMessages,
         saveChatMessage,

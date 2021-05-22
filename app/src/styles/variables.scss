@@ -1,0 +1,64 @@
+@use 'sass:map';
+
+$font-sizes: (
+    headtext: 18,
+    bodytext: 15,
+    captiontext: 14,
+    icon: 15,
+    minitext: 12,
+    maintext: 16,
+    titletext: 24,
+    titleicon: 20,
+    controltext: 18,
+    controlicon: 16,
+    attentiontext: 30,
+    bigicon: 75,
+);
+
+$line-heights: (
+    headtext: 22,
+    bodytext: 18,
+    captiontext: 17,
+    icon: 15,
+    minitext: 15,
+    maintext: 19,
+    titletext: 29,
+    titleicon: 23,
+    controltext: 22,
+    controlicon: 16,
+    attentiontext: 36,
+    bigicon: 75,
+);
+
+@function get-font-size($size) {
+    @return #{map.get($font-sizes, $size) / 16}rem;
+};
+
+@function get-line-height($size) {
+    @return #{map.get($line-heights, $size) / 16}rem;
+}
+
+@function get-rem($size) {
+    @return #{$size / 16}rem;
+}
+
+$phone-max-width: get-rem(500);
+$tablet-max-width: get-rem(834);
+
+$colors: (
+    'bg-1': '#FEFEFF',
+    'bg-2': '#F9F9F8',
+    'bg-3': '#F1F1EF',
+    'bg-4': '#EAEAE6',
+    'text-body': '#080807',
+    'text-heading': '#131310',
+    'text-resting': '#46463B',
+    'text-disabled': '#5D5D4E',
+    'brand-primary': '#249E6B',
+    'brand-secondary': '#AD2B31',
+    'brand-tertiary': '#2B93AD'
+);
+
+@function get-color($name) {
+    @return map.get($colors, $name);
+}
