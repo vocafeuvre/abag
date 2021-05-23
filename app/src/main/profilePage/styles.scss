@@ -1,0 +1,5 @@
+@use '../../styles/variables.scss';
+
+.profile-page {
+    background-color: variables.get-color('brand-primary');
+}
