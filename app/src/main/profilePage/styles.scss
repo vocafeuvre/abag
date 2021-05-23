@@ -2,4 +2,45 @@
 
 .profile-page {
     background-color: variables.get-color('brand-primary');
+    height: 100%;
+    width: 100%;
+}
+
+.back-container {
+    color: variables.get-color('bg-1');
+
+    height: variables.get-rem(56);
+    width: 100%;
+    display: flex;
+}
+
+.back-container--light {
+    color: variables.get-color('text-heading');
+}
+
+.back-container__icon {
+    margin-left: auto;
+}
+
+.profile-details {
+    background-color: variables.get-color('bg-2');
+
+    margin-top: variables.get-rem(300 - 56);
+    height: calc(100% - 300rem);
+    width: 100%;
+}
+
+.profile-avatar {
+    border-radius: 50%;
+    border: variables.get-rem(10) solid variables.get-color('brand-primary');
+
+    height: variables.get-rem(200);
+    width: variables.get-rem(200);
+
+    position: relative;
+    top: variables.get-rem(-100);
+}
+
+.profile-details__bio, .profile-details__email, .profile-details__contact, .profile-details__address, .profile-details__city, .profile-details__state, .profile-details__zipcode, .profile-details__country {
+    margin-top: variables.get(10);
 }

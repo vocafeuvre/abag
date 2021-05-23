@@ -3,16 +3,21 @@ import { hot } from 'react-hot-loader'
 import { useAuth0 } from '@auth0/auth0-react'
 
 import { Notification, NotificationGroup } from '@progress/kendo-react-notification'
-import { Route } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
+
+import createApiClient from './clients/api'
 
 import AppBar from './main/AppBar'
 import DriveFeed from './main/DriveFeed'
 import DrivePage from './main/DrivePage'
 import DriveOrganizer from './main/DriveOrganizer'
+import DriveCreation from './main/DriveCreation'
 import Dashboard from './main/Dashboard'
 import ProfilePage from './main/ProfilePage'
 
 import './main/styles.scss'
+
+import settings from '../../web-settings.json'
 
 const NOTIFICATION_AUTOCLOSE = 5000
 
@@ -43,6 +48,8 @@ const Main = () => {
     }, NOTIFICATION_AUTOCLOSE)
   }
 
+  const apiClient = createApiClient(settings)
+
   const { loginWithRedirect } = useAuth0()
 
   function login() {
@@ -51,10 +58,13 @@ const Main = () => {
 
   return (
     <>
-      <AppContext.Provider value={{ notifyApp }}>
-        <div className='app-bar'>
-          <AppBar login={login} />
-        </div>
+      <AppContext.Provider value={{ notifyApp, apiClient }}>
+        <Switch>
+          <Route path='/profile'><></></Route>
+          <Route path='/'>
+            <AppBar login={login} />
+          </Route>
+        </Switch>
         <Route exact path='/'>
           <DriveFeed />
         </Route>
@@ -69,6 +79,9 @@ const Main = () => {
         </Route>
         <Route path='/organizer'>
           <DriveOrganizer />
+        </Route>
+        <Route path='/create-drive'>
+          <DriveCreation />
         </Route>
       </AppContext.Provider>
       <NotificationGroup style={{ right: 0, bottom: 0 }}>

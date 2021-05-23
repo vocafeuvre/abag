@@ -58,10 +58,10 @@ const ProfilePage = props => {
                 </div>
               </nav>
               <div className='profile-container'>
-                <div className='profile-avatar'>
-                  <img src={props.account.avatar} alt={props.account.givenName} />
-                </div>
                 <div className='profile-details'>
+                  <div className='profile-avatar'>
+                    <img src={props.account.avatar} alt={props.account.givenName} />
+                  </div>
                   <div className='profile-details__name'>{profile.givenName + ' ' + profile.lastName}</div>
                   { editMode ? 
                               <FloatingLabel editorId='__profile-details-bio' editorValue={profile.bio} label={'Bio'}>

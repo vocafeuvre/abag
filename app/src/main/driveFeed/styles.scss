@@ -92,6 +92,10 @@
     }
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: variables.$tablet-max-width) {
+
+}
+
+@media screen and (max-width: variables.$phone-max-width) {
 
 }

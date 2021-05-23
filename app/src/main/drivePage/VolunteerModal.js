@@ -42,7 +42,6 @@ const VolunteerModal = props => {
               name={"volunteer-skills"}
               label={"Skills"}
               component={FormChipList}
-              views={1}
             />
             <div className="k-form-buttons">
               <Button
