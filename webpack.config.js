@@ -5,8 +5,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     entry: {
-        main: './src/index.js',
-        sw: './src/service-worker.js'
+        main: './app/index.js',
+        sw: './app/service-worker.js'
     },
     module: {
         rules: [
@@ -34,6 +34,10 @@ module.exports = {
             {
               test: /\.ttf/,
               type: 'asset/resource'
+            },
+            {
+                test: /\.(png|svg|jpg|jpeg)/,
+                type: 'asset/resource'
             }
         ]
     },

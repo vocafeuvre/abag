@@ -8,10 +8,12 @@ function createApiClient(settings) {
     var pendingApiCalls = new Map()
 
     var userIsAuthed = false
+    var canAuthVar = true
 
     var client = {}
 
     function handleApiCallResponse(nonce, response) {
+        console.log('hiya', pendingApiCalls, nonce)
         var pendingApiCall = pendingApiCalls.get(nonce)
         if (response.error) {
             pendingApiCall.reject(response.error)
@@ -22,20 +24,42 @@ function createApiClient(settings) {
 
     function makeApiCall(message) {
         if (!socket) {
-            throw new Error('Should load apiClient first.')
+            return load().then(function () {
+                return new Promise(function (resolve, reject) {
+                    var apiCallNonce = apiCallNoncer++
+        
+                    try {
+                        socket.send(JSON.stringify({
+                            type: 'api-call',
+                            nonce: apiCallNonce,
+                            call: message
+                        }))
+                    } catch (e) {
+                        reject(e)
+                        return
+                    }
+        
+                    pendingApiCalls.set(apiCallNonce, { resolve, reject })
+                })
+            })
+        } else {
+            return new Promise(function (resolve, reject) {
+                var apiCallNonce = apiCallNoncer++
+    
+                try {
+                    socket.send(JSON.stringify({
+                        type: 'api-call',
+                        nonce: apiCallNonce,
+                        call: message
+                    }))
+                } catch (e) {
+                    reject(e)
+                    return
+                }
+    
+                pendingApiCalls.set(apiCallNonce, { resolve, reject })
+            })
         }
-
-        return new Promise(function (resolve, reject) {
-            var apiCallNonce = apiCallNoncer++
-
-            socket.send(JSON.stringify({
-                type: 'api-call',
-                nonce: apiCallNonce,
-                call: message
-            }))
-
-            pendingApiCalls.set(apiCallNonce, { resolve, reject })
-        })
     }
    
     function handleBufferMessage(message) {
@@ -62,7 +86,8 @@ function createApiClient(settings) {
                 socketOpened = true
 
                 socket.addEventListener('message', function (evt) {
-                    var message = evt.data.message
+                    var message = evt.data
+                    console.log('samik', message)
                     
                     if (typeof message === 'string') {
                         try {
@@ -94,12 +119,24 @@ function createApiClient(settings) {
 
     function authenticate(authToken) {
         return makeApiCall({
+            action: 'authenticate',
             authToken
         }).then(function (data) {
             userIsAuthed = true
+            return data.profile
         }).catch(function (err) {
+            canAuthVar = false
             console.error(err)
+            return Promise.reject(err)
         })
+    }
+
+    function isUserAuthed() {
+        return userIsAuthed
+    }
+
+    function canAuth() {
+        return canAuthVar
     }
 
     function logout() {
@@ -117,8 +154,15 @@ function createApiClient(settings) {
         })
     }
 
+    function saveProfile() {
+
+    }
+
     client.load = load
     client.getUser = getUser
+    client.authenticate = authenticate
+    client.isUserAuthed = isUserAuthed
+    client.canAuth = canAuth
 
     return client
 }

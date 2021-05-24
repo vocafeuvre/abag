@@ -63,13 +63,14 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
 
     function handleApiCall(call, respond) {
         var action = call.action
+        console.log('api-call', call)
 
         if (action === 'get-user') {
-            apiDb.get(call.userId).then(function (doc) {
+            apiDb.getUser(call.userId).then(function (user) {
                 if (doc) {
                     respond({
                         data: {
-                            user: doc
+                            user
                         }
                     })
                 } else {
@@ -81,6 +82,24 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
                 console.error(err)
                 respond({
                     error: 'Unable to get user.'
+                })
+            })
+        } else if (action === 'update-user') {
+            apiDb.updateUser(call.user).then(function (resp) {
+                if (resp) {
+                    respond({
+                        data: {
+                            user: resp
+                        }
+                    })
+                } else {
+                    respond({
+                        error: 'Unable to update user.'
+                    })
+                }
+            }).catch(function (err) {
+                respond({
+                    error: err
                 })
             })
         } else if (action === 'sync-profile') {
@@ -100,19 +119,120 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
                     }
                 })
             }
+        } else if (action === 'get-drives') {
+            apiDb.getDrives(call.sortType, call.searchKey).then(function (drives) {
+                respond({
+                    data: {
+                        action,
+                        drives
+                    }
+                })
+            }).catch(function (err) {
+                respond({
+                    error: err
+                })
+            })
+        } else if (action === 'create-drive') {
+            apiDb.createDrive(call.drive, call.organizer).then(function (drive) {
+                if (drive) {
+                    respond({
+                        data: {
+                            drive
+                        }
+                    })
+                } else {
+                    respond({
+                        error: 'Unable to save to drive to db.'
+                    })
+                }
+            }).catch(function (err) {
+                respond({
+                    error: err
+                })
+            })
+        } else if (action === 'get-drives-by-organizer') {
+            apiDb.getDrivesByOrganizer(call.organizerId).then(function (drives) {
+                respond({
+                    data: {
+                        organizerId,
+                        drives
+                    }
+                })
+            }).catch(function (err) {
+                respond({
+                    error: err
+                })
+            })
+
+            sendVolunteerRequest
+            sendDonationAttempt
+
+        } else if (action === 'update-drive-seen-count') {
+            apiDb.updateDriveSeenCount(call.driveId, call.seenCount).then(function (resp) {
+                if (resp) {
+                    respond({
+                        data: {
+                            driveId: resp._id,
+                            seenCount: resp.seenCount
+                        }
+                    })
+                } else {
+                    respond({
+                        error: 'Unable to update seen count.'
+                    })
+                }
+            }).catch(function (err) {
+                respond({
+                    error: err
+                })
+            })
+        } else if (action === 'send-volunteer-request') {
+            apiDb.sendVolunteerRequest(call.driveId, call.volunteerRequest).then(function (resp) {
+                if (resp) {
+                    respond({
+                        data: {
+                            drive: resp
+                        }
+                    })
+                } else {
+                    respond({
+                        error: 'Unable to save volunteer request.'
+                    })
+                }
+            }).catch(function (err) {
+                respond({
+                    error: err
+                })
+            })
+        } else if (action === 'send-donation-attempt') {
+            apiDb.sendDonationAttempt(call.driveId, call.donation).then(function (resp) {
+                if (resp) {
+                    respond({
+                        data: {
+                            drive: resp
+                        }
+                    })
+                } else {
+                    respond({
+                        error: 'Unable to save donation attempt.'
+                    })
+                }
+            }).catch(function (err) {
+                respond({
+                    error: err
+                })
+            })
         } else if (action === 'authenticate') {
             verifyToken(call.authToken).then(function (result) {
                 if (result) {
                     getProfileFromToken(call.authToken).then(function (rawProfile) {
-                        apiDb.findOrCreateProfile(rawProfile).then(function (profile) {
-                            var userId = profile.userId
-
+                        apiDb.findOrCreateUser(rawProfile).then(function (profile) {
                             activeProfiles.set(profile)
 
                             respond({
                                 data: {
                                     action,
-                                    userId,
+                                    userId: profile.id,
                                     isAuthed: true,
                                     profile
                                 }
@@ -122,6 +242,11 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
                             respond({
                                 error: 'Profile creation error'
                             })
+                        })
+                    }).catch(function (err) {
+                        console.error('Profile getting error, ', err)
+                        respond({
+                            error: 'Profile getting error'
                         })
                     })
                 } else {
@@ -148,6 +273,7 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
 
         if (type === 'api-call') {
             handleApiCall(message.call, function (response) {
+                console.log('api-return', response)
                 socket.send(jsonify({
                     type,
                     nonce: message.nonce,
@@ -161,12 +287,9 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
         var socketId = socketNonce++
 
         sockets.set(socketId, socket)
+        console.log('Socket incoming, numbered ' + socketId + ' and saved')
 
         socket.on('message', function (message) {
-            if (ignoredSockets.has(socket)) {
-                return
-            }
-            
             if (typeof message === 'string') {
                 try {
                     handleJsonMessage(message, socketId, socket)
@@ -183,7 +306,7 @@ function createAPIServer(wsServer = new WebSocket.Server(), apiDb) {
         })
 
         socket.on('close', function (reason) {
-            console.error(`Socket ${socketId} closed because of reason ${reason === null || reason === undefined || reason === '' ? 'unknown' : reason}, `, err)
+            console.error(`Socket ${socketId} closed because of reason ${reason === null || reason === undefined || reason === '' ? 'unknown' : reason}, `)
         })
     })
 

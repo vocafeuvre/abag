@@ -1,4 +1,3 @@
-const redis = require('redis')
 const PouchDB = require('pouchdb')
 const WebSocket = require('ws')
 
@@ -13,9 +12,7 @@ const chatDb = wrapChatDb(
     new PouchDB(new URL('chat-messages', settings.couchdb_url)),
 )
 
-const auther = createAuther(
-    redis.createClient() // TODO: specify the location of redis here
-)
+const auther = createAuther()
 
 createChatServer(
     new WebSocket.Server({

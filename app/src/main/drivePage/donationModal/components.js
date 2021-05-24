@@ -3,7 +3,7 @@ import * as React from "react"
 import { DropDownList } from '@progress/kendo-react-dropdowns'
 import { Label, Error, Hint, FloatingLabel } from '@progress/kendo-react-labels'
 import { FieldWrapper } from '@progress/kendo-react-form'
-import { Upload } from '@progress/kendo-react-form'
+import { Upload } from '@progress/kendo-react-upload'
 import { NumericTextBox, TextArea } from '@progress/kendo-react-inputs'
 
 export const FormDropDownList = fieldRenderProps => {

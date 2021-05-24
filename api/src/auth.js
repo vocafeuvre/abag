@@ -26,7 +26,7 @@ function getKey(header, callback){
 
 function verifyToken(token) {
     return new Promise(function (resolve, reject) {
-        jwt.verify(token, getKey, options, function(err, decoded) {
+        jwt.verify(token, getKey, { algorithms: ['RS256'] }, function(err, decoded) {
             if (err) {
                 reject(err)
                 return

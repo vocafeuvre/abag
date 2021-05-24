@@ -1,0 +1,44 @@
+@use '../../styles/variables.scss';
+
+.k-appbar {
+    background-color: variables.get-color('brand-primary');
+    justify-content: center;
+
+    .k-appbar-section {
+        flex-shrink: 0;
+    }
+}
+
+.appbar-container {
+    display: inherit;
+    width: 100%;
+    max-width: variables.$tablet-max-width;
+}
+
+.appbar-menu {
+    width: variables.get-rem(250);
+
+    &__link {
+        list-style: none;
+        color: variables.get-color('text-heading');
+        padding: variables.get-rem(8) 0;
+
+        &--actionable {
+            cursor: pointer;
+        }
+
+        > a {
+            color: inherit;
+        }
+    }
+}
+
+.popup-content {
+    padding: variables.get-rem(18);
+    background-color: variables.get-color('bg-1');
+    border: 1px solid rgba(0,0,0,.05);
+}
+
+.signin-button {
+    color: variables.get-color('bg-1')
+}

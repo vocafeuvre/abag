@@ -4,6 +4,10 @@
     background-color: variables.get-color('brand-primary');
     height: 100%;
     width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .back-container {
@@ -11,7 +15,10 @@
 
     height: variables.get-rem(56);
     width: 100%;
+    max-width: variables.$tablet-max-width;
+
     display: flex;
+    padding: variables.get-rem(16);
 }
 
 .back-container--light {
@@ -22,12 +29,29 @@
     margin-left: auto;
 }
 
-.profile-details {
-    background-color: variables.get-color('bg-2');
+.back-container__link {
+    > a {
+        color: inherit;
+    }
+}
 
+.profile-container {
     margin-top: variables.get-rem(300 - 56);
-    height: calc(100% - 300rem);
     width: 100%;
+    background-color: white;
+    min-height: calc(100% - #{variables.get-rem(300 - 56)});
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-details {
+    width: 100%;
+    max-width: variables.$tablet-max-width;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .profile-avatar {
@@ -39,8 +63,16 @@
 
     position: relative;
     top: variables.get-rem(-100);
+
+    > img {
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+    }
 }
 
 .profile-details__bio, .profile-details__email, .profile-details__contact, .profile-details__address, .profile-details__city, .profile-details__state, .profile-details__zipcode, .profile-details__country {
-    margin-top: variables.get(10);
+    margin-top: variables.get-rem(10);
 }

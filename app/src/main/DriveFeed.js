@@ -19,7 +19,8 @@ const filters = [
 // that it should remain in server-land
 
 const DriveFeed = () => {
-  const [] = React.useState()
+  var drives = []
+  var filtersApplied = false
 
   const observePossibleSearches = callback => {
 
@@ -30,11 +31,27 @@ const DriveFeed = () => {
   }
 
   return (
-    <div>
-      <DriveFilter filters={filters} />
-      <DriveSearch />
-      <DriveView drives={}/>
-    </div>
+    <section className='drive-feed'>
+      {
+        drives.length === 0 && filtersApplied
+          ?
+            <>
+              <DriveFilter filters={filters} />
+              <DriveSearch />
+              <DriveView drives={drives}/>
+            </>
+          :
+            <div className='drive-feed__no-entries'>
+              <div className='k-icon k-i-info drive-feed__no-entries-icon'></div>
+              <div className='drive-feed__no-entries-title'>
+                Uhm, no drives organized yet
+              </div>
+              <div className='drive-feed__no-entries-desc'>
+                Why don't you organize the first drive yourself?
+              </div>
+            </div>
+      }
+    </section>
   )
 }
 
